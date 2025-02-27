@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
 import { Link } from "react-router";
@@ -7,26 +7,8 @@ import axios from "axios";
 function AllTeachers() {
   const [teacherList, setTeacherList] = useState([]);
   const [filteredTeacherList, setFilteredTeacherList] = useState([]);
-  const [searchID, setSearchID] = useState("");
-  const [searchName, setSearchName] = useState("");
-  const [searchPhone, setSearchPhone] = useState("");
 
-  const handleSearch = () => {
-    const filteredList = teacherList.filter(teacher => {
-      const lowerCaseID = teacher.id.toLowerCase();
-      const lowerCaseName = teacher.name.toLowerCase();
-      const lowerCasePhone = teacher.phone.toLowerCase();
-
-      const lowerCaseSearchID = searchID.toLowerCase();
-      const lowerCaseSearchName = searchName.toLowerCase();
-      const lowerCaseSearchPhone = searchPhone.toLowerCase();
-
-      return (lowerCaseID.includes(lowerCaseSearchID) && lowerCaseName.includes(lowerCaseSearchName) && lowerCasePhone.includes(lowerCaseSearchPhone))
-    });
-    setFilteredTeacherList(filteredList);
-  };
-
-  const getData = async () => {
+  const getData = useCallback(async () => {
     try {
       const res = await axios.get('http://localhost:3000/teachers/all');
       setTeacherList(res.data.data);
@@ -34,11 +16,30 @@ function AllTeachers() {
     } catch (err) {
       console.log(err);
     }
-  }
+  }, []);
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [getData]);
+
+  const handleSearch = (key, value) => {
+    if (!value) {
+      setFilteredTeacherList(teacherList);
+      return;
+    }
+
+    const filtered = teacherList.filter(teacher =>
+      String(teacher[key]).toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredTeacherList(filtered);
+  };
+
+  // eslint-disable-next-line react/prop-types
+  const TableHeader = ({ label }) => (
+    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      {label}
+    </th>
+  );
 
   return (
     <div className="flex">
@@ -59,48 +60,23 @@ function AllTeachers() {
           </div>
           <div className="p-10 bg-white rounded-b-xl shadow-lg">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <input
-                type="text"
-                placeholder="Search by ID ..."
-                value={searchID}
-                onChange={(e) => setSearchID(e.target.value)}
-                className="border rounded-md px-3 py-2"
-              />
-              <input
-                type="text"
-                placeholder="Search by Name ..."
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-                className="border rounded-md px-3 py-2"
-              />
-              <input
-                type="text"
-                placeholder="Search by Phone ..."
-                value={searchPhone}
-                onChange={(e) => setSearchPhone(e.target.value)}
-                className="border rounded-md px-3 py-2"
-              />
-              <button
-                onClick={handleSearch}
-                className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 flex items-center justify-center"
-              >
-                SEARCH
-              </button>
+              {['name',"email"].map((field) => (
+                <input
+                  key={field}
+                  type="text"
+                  placeholder={`Search by ${field.charAt(0).toUpperCase() + field.slice(1)} ...`}
+                  className="border rounded-md px-3 py-2"
+                  onChange={({ target: { value } }) => handleSearch(field, value)}
+                />
+              ))}
             </div>
-
 
             <table className="min-w-full divide-y divide-gray-200 mt-2 border">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Birth</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Group</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Religion</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  {['ID', 'Name', 'Gender', 'Date of Birth', 'Blood Group', 'Religion', 'Address', 'Phone', 'Email'].map(header => (
+                    <TableHeader key={header} label={header} />
+                  ))}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -124,6 +100,6 @@ function AllTeachers() {
       </div>
     </div>
   );
-};
+}
 
 export default AllTeachers;
