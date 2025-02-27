@@ -32,4 +32,17 @@ router.get("/all", async (req, res) => {
     }
 });
 
+router.post('/find/:name', async (req, res) => {
+    const name = req.params.name;
+    
+    try{
+        const students = await Student.find({name: name})
+        res.send({
+            success: true, data: students
+        })
+    } catch(err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+})
+
 export default router;
