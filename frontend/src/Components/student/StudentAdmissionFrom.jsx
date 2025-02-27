@@ -226,7 +226,7 @@ function StudentAdmissionForm() {
                     <input
                       type="text"
                       // name={}
-                      value={formData.parant}
+                      value={formData.parent}
                       onChange={(e) =>
                         setFormData({ ...formData, parent: e.target.value })
                       }
