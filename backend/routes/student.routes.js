@@ -36,7 +36,7 @@ router.post('/find/:name', async (req, res) => {
     const name = req.params.name;
     
     try{
-        const students = await Student.find({name: name})
+        const students = await Student.find({name})
         res.send({
             success: true, data: students
         })

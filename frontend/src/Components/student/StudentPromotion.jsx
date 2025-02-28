@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
 import { Link } from "react-router";
@@ -32,8 +33,13 @@ function StudentPromotion() {
       );
       const data = res.data;
       setStudentList(data);
-      console.log(studentList);
-      
+      if (data.length > 0) {
+        setOldDetails({
+          StudentClass: data[0].class,
+          StudentSection: data[0].section,
+          StudentRoll: data[0].roll
+        });
+      }
     } catch (err) {
       console.log(err);
     }
@@ -54,7 +60,7 @@ function StudentPromotion() {
             <Link className="text-blue-600">Student Promotion</Link>
           </div>
           <div className="px-10">
-            <form onSubmit={searchHandel} className="">
+            <form onSubmit={searchHandle} className="">
               <p className="text-2xl font-semibold bg-blue-600 text-white p-3 rounded-t-xl">
                 Search Student Promotion
               </p>
@@ -76,7 +82,7 @@ function StudentPromotion() {
                   </button>
                 </div>
 
-                {studentList.length < 0 ? (
+                {studentList.length > 0 ? (
                   <div>
                     {studentList.map((student, index) => (
                       <div key={index}>
